@@ -31,6 +31,12 @@ def NCPA_application(wf, npupil, NCPA, Debug_print, Debug):
     lambda2=lamda/(1e-6) # need to use lambda in microns
     screen_atm = np.exp(1j*NCPA_large/lambda2*2*math.pi)
     proper.prop_multiply(wf, screen_atm) # multiply the atm screen to teh wavefront
+
+#rms_error = NCPA[0]#30nm-- RMS wavefront error in meters
+#c_freq = NCPA[1]# 5  ;-- correlation frequency (cycles/meter)
+#high_power = NCPA[2]#3.0  ;-- high frequency falloff (r^-high_power)
+#RANDOM_MAP = readfits('RANDOM_MAP.fits')
+#proper.prop_psd_errormap_mod( wf, rms_error, c_freq, high_power, RMS=True)
     
     
     return
