@@ -12,7 +12,7 @@ import sys
 PACKAGE_PATH = os.path.abspath(os.path.join(__file__, os.pardir))
 sys.path.append(PACKAGE_PATH)
 
-def metiscoronagraphsimulator(n,lam, pixelsize, prefix, diam=37., r_obstr=0.3, f_lens=658.6, pupil_file=0,  spiders_width=0.60, spiders_angle=[0., 60., 120.], charge=0, LS_parameters=[0.0, 0.0, 0.0], amplitude_apodizer_file=0,phase_apodizer_file=0,LS_amplitude_apodizer_file=0,LS_phase_apodizer_file=0,  TILT=[0.0, 0.0], atm_screen=0., missing_segments_number=0, apodizer_misalignment=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0], LS_misalignment=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0], Island_Piston=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0], NCPA=0., NoCoro_psf=0, Offaxis_psf=0, ELT_circ=True, Vortex=False, Back=False, RAVC=False, LS=False, Debug=True, Debug_print=True, Norm_max=True, Norm_flux1=False):
+def metiscoronagraphsimulator(n,lam, pixelsize, prefix, path, diam=37., r_obstr=0.3, f_lens=658.6, pupil_file=0,  spiders_width=0.60, spiders_angle=[0., 60., 120.], charge=0, LS_parameters=[0.0, 0.0, 0.0], amplitude_apodizer_file=0,phase_apodizer_file=0,LS_amplitude_apodizer_file=0,LS_phase_apodizer_file=0,  TILT=[0.0, 0.0], atm_screen=0., missing_segments_number=0, apodizer_misalignment=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0], LS_misalignment=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0], Island_Piston=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0], NCPA=0., NoCoro_psf=0, Offaxis_psf=0, ELT_circ=True, Vortex=False, Back=False, RAVC=False, LS=False, Debug=True, Debug_print=True, Norm_max=True, Norm_flux1=False):
     """MCS.
         
         Parameters
@@ -29,6 +29,9 @@ def metiscoronagraphsimulator(n,lam, pixelsize, prefix, diam=37., r_obstr=0.3, f
         prefix : string
         Prefix for the fits file writing
         
+        path : string
+        path where to save the outputs
+        
         
         Returns
         -------
@@ -42,6 +45,9 @@ def metiscoronagraphsimulator(n,lam, pixelsize, prefix, diam=37., r_obstr=0.3, f
         
         r_obstr: 0.3 -->float, ratio
         when both ELT_circ and other_pupil are False, the central obstruction has to be defined here
+        
+        f_lens: 658.6 --> float, meters
+        focal distance
         
         pupil_file: 0 --> float matrix
         it contains the pupil in case the 'other_pupil' is called
@@ -102,9 +108,6 @@ def metiscoronagraphsimulator(n,lam, pixelsize, prefix, diam=37., r_obstr=0.3, f
         ELT_circ : bool
         If the pupil is the circularised ELT pupil in the file "ELT_2048_37m_11m_5mas_nospiders_cut.fits"
 
-        other_pupil : bool
-        If the pupil is not the circularised ELT pupil in the file "ELT_2048_37m_11m_5mas_nospiders_cut.fits", then it needs the passvalue 'pupil_file' which contains the pupil file
-        
         Vortex : bool
         If the coronagraph is a vortex coronagraph, it needs the passvalue 'charge', which contains the charge of the vortex
         
@@ -149,54 +152,41 @@ def metiscoronagraphsimulator(n,lam, pixelsize, prefix, diam=37., r_obstr=0.3, f
     LS_misalignment=np.array(LS_misalignment)
     Island_Piston=np.array(Island_Piston)
 
-#    mod = importlib.import_module(".telescope", "cats.cats_simus")
-#    help(mod)
-#    print('Miao1')
-
-#    p2,m2,r2='cats.cats_simus.telescope'.rsplit('.',2)
-#    mod2 = importlib.import_module('cats.cats_simus.telescope')
-#    met2 = getattr(mod2, r2)
-#    print('Mod2')
-#    help(mod2)
-#    print('Met2')
-#    help(met2)
-
-
 
     if (isinstance(NoCoro_psf, (list, tuple, np.ndarray)) != True):
 ## Non coronagraphic PSF --> simulate a non-coronagraphic psf
-        (wfo_noCoro, sampling) = proper.prop_run('telescope', lam, n, PASSVALUE={'prefix':prefix, 'charge':0, 'CAL':0, 'diam':diam, 'spiders_width':spiders_width, 'spiders_angle':spiders_angle, 'beam_ratio': beam_ratio, 'f_lens':f_lens, 'npupil':npupil, 'r_obstr':r_obstr, 'pupil_file':pupil_file, 'phase_apodizer_file':0, 'amplitude_apodizer_file':0, 'TILT':[0.,0.],'LS':False,'RAVC':False, 'LS_phase_apodizer_file':0, 'LS_amplitude_apodizer_file':0,'LS_parameters':[0., 0., 0.], 'atm_screen':0, 'missing_segments_number':0, 'apodizer_misalignment':[0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'LS_misalignment':[0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'Island_Piston':[0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'NCPA':0, 'Debug_print':Debug_print,'Debug':Debug}, QUIET=True)
+        (wfo_noCoro, sampling) = proper.prop_run('telescope', lam, n, PASSVALUE={'prefix':prefix, 'path':path, 'charge':0, 'CAL':0, 'diam':diam, 'spiders_width':spiders_width, 'spiders_angle':spiders_angle, 'beam_ratio': beam_ratio, 'f_lens':f_lens, 'npupil':npupil, 'r_obstr':r_obstr, 'pupil_file':pupil_file, 'phase_apodizer_file':0, 'amplitude_apodizer_file':0, 'TILT':[0.,0.],'LS':False,'RAVC':False, 'LS_phase_apodizer_file':0, 'LS_amplitude_apodizer_file':0,'LS_parameters':[0., 0., 0.], 'atm_screen':0, 'missing_segments_number':0, 'apodizer_misalignment':[0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'LS_misalignment':[0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'Island_Piston':[0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'NCPA':0, 'Debug_print':Debug_print,'Debug':Debug}, QUIET=True)
         NoCoro_psf = (abs(wfo_noCoro))**2
-        fits.writeto(prefix+'_psf_noCoro_nonorm.fits', NoCoro_psf[int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio),int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio)], overwrite=True)
+        fits.writeto(path+prefix+'_psf_noCoro_nonorm.fits', NoCoro_psf[int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio),int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio)], overwrite=True)
         #if ("Norm_max" in kwargs and kwargs["Norm_max"]):
         if (Norm_max == True):
             psf_noCoro_maxnorm = NoCoro_psf/np.max(NoCoro_psf)
-            fits.writeto(prefix+'_psf_noCoro_maxnorm.fits', psf_noCoro_maxnorm[int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio),int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio)], overwrite=True)
+            fits.writeto(path+prefix+'_psf_noCoro_maxnorm.fits', psf_noCoro_maxnorm[int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio),int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio)], overwrite=True)
         #if ("Norm_flux1" in kwargs and kwargs["Norm_flux1"]):
         if (Norm_flux1 == True):
             psf_noCoro_flux1norm = NoCoro_psf/sum(sum(NoCoro_psf))
-            fits.writeto(prefix+'_psf_noCoro_flux1norm.fits', psf_noCoro_flux1norm[int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio),int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio)], overwrite=True)
+            fits.writeto(path+prefix+'_psf_noCoro_flux1norm.fits', psf_noCoro_flux1norm[int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio),int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio)], overwrite=True)
 
     ## Coronagraphic PSF
     if (Vortex == True):
     
         if (Back == True):
         ## A/R --> simulate a perfect vortex by propagating a perfectly circular pupil through the vortex to the Lyot Stop, null the amplitude inside (as theory requires), then propagating back to the vortex level and save a "modified" vortex, to use in the future simulations
-            (wfo_AR, sampling) = proper.prop_run('telescope', lam, n, PASSVALUE={'prefix':prefix, 'charge':charge, 'CAL':1, 'diam':diam, 'spiders_width':0, 'spiders_angle':[0., 0., 0.], 'beam_ratio': beam_ratio, 'f_lens':f_lens, 'npupil':npupil, 'r_obstr':0., 'pupil_file':0, 'phase_apodizer_file':0, 'amplitude_apodizer_file':0, 'TILT':[0.,0.],'LS':False,'RAVC':False, 'LS_phase_apodizer_file':0, 'LS_amplitude_apodizer_file':0,'LS_parameters':[0., 0., 0.], 'atm_screen':0, 'missing_segments_number':0, 'apodizer_misalignment':[0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'LS_misalignment':[0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'Island_Piston':[0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'NCPA':0, 'Debug_print':Debug_print,'Debug':Debug}, QUIET=True)
+            (wfo_AR, sampling) = proper.prop_run('telescope', lam, n, PASSVALUE={'prefix':prefix, 'path':path, 'charge':charge, 'CAL':1, 'diam':diam, 'spiders_width':0, 'spiders_angle':[0., 0., 0.], 'beam_ratio': beam_ratio, 'f_lens':f_lens, 'npupil':npupil, 'r_obstr':0., 'pupil_file':0, 'phase_apodizer_file':0, 'amplitude_apodizer_file':0, 'TILT':[0.,0.],'LS':False,'RAVC':False, 'LS_phase_apodizer_file':0, 'LS_amplitude_apodizer_file':0,'LS_parameters':[0., 0., 0.], 'atm_screen':0, 'missing_segments_number':0, 'apodizer_misalignment':[0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'LS_misalignment':[0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'Island_Piston':[0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'NCPA':0, 'Debug_print':Debug_print,'Debug':Debug}, QUIET=True)
         
         if (isinstance(Offaxis_psf, (list, tuple, np.ndarray)) != True):
             ## No Vortex Si Mask --> simulate a non-coronagraphic-apodized psf: apodizer and Lyot Stop are present, but not the vortex --> as an off-axis psf
-            (wfo_offaxis, sampling) = proper.prop_run('telescope', lam, n, PASSVALUE={'prefix':prefix, 'charge':0, 'CAL':0, 'diam':diam, 'spiders_width':spiders_width, 'spiders_angle':spiders_angle, 'beam_ratio': beam_ratio, 'f_lens':f_lens, 'npupil':npupil, 'r_obstr':r_obstr, 'pupil_file':pupil_file, 'phase_apodizer_file':phase_apodizer_file, 'amplitude_apodizer_file':amplitude_apodizer_file, 'TILT':[0.,0.],'LS':LS,'RAVC':RAVC, 'LS_phase_apodizer_file':LS_phase_apodizer_file, 'LS_amplitude_apodizer_file':LS_amplitude_apodizer_file,'LS_parameters':LS_parameters, 'atm_screen':0, 'missing_segments_number':missing_segments_number, 'apodizer_misalignment':[0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'LS_misalignment':[0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'Island_Piston':[0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'NCPA':0, 'Debug_print':Debug_print,'Debug':Debug}, QUIET=True)
+            (wfo_offaxis, sampling) = proper.prop_run('telescope', lam, n, PASSVALUE={'prefix':prefix, 'path':path, 'charge':0, 'CAL':0, 'diam':diam, 'spiders_width':spiders_width, 'spiders_angle':spiders_angle, 'beam_ratio': beam_ratio, 'f_lens':f_lens, 'npupil':npupil, 'r_obstr':r_obstr, 'pupil_file':pupil_file, 'phase_apodizer_file':phase_apodizer_file, 'amplitude_apodizer_file':amplitude_apodizer_file, 'TILT':[0.,0.],'LS':LS,'RAVC':RAVC, 'LS_phase_apodizer_file':LS_phase_apodizer_file, 'LS_amplitude_apodizer_file':LS_amplitude_apodizer_file,'LS_parameters':LS_parameters, 'atm_screen':0, 'missing_segments_number':missing_segments_number, 'apodizer_misalignment':[0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'LS_misalignment':[0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'Island_Piston':[0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'NCPA':0, 'Debug_print':Debug_print,'Debug':Debug}, QUIET=True)
             Offaxis_psf = (abs(wfo_offaxis))**2
-            fits.writeto(prefix+'_psf_offaxis_nonorm.fits', Offaxis_psf[int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio),int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio)], overwrite=True)
+            fits.writeto(path+prefix+'_psf_offaxis_nonorm.fits', Offaxis_psf[int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio),int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio)], overwrite=True)
             if (Norm_max == True):
                 #if ("Norm_max" in kwargs and kwargs["Norm_max"]):
                 psf_noVortex_Mask_maxnorm = Offaxis_psf/np.max(NoCoro_psf)
-                fits.writeto(prefix+'_psf_offaxis_maxnorm.fits', psf_noVortex_Mask_maxnorm[int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio),int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio)], overwrite=True)
+                fits.writeto(path+prefix+'_psf_offaxis_maxnorm.fits', psf_noVortex_Mask_maxnorm[int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio),int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio)], overwrite=True)
             if (Norm_flux1 == True):
                 #if ("Norm_flux1" in kwargs and kwargs["Norm_flux1"]):
                 psf_noVortex_Mask_flux1norm = Offaxis_psf/sum(sum(NoCoro_psf))
-                fits.writeto(prefix+'_psf_offaxis_flux1norm.fits', psf_noVortex_Mask_flux1norm[int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio),int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio)], overwrite=True)
+                fits.writeto(path+prefix+'_psf_offaxis_flux1norm.fits', psf_noVortex_Mask_flux1norm[int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio),int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio)], overwrite=True)
 
     atm_screen=np.array(atm_screen)
     NCPA=np.array(NCPA)
@@ -221,7 +211,7 @@ def metiscoronagraphsimulator(n,lam, pixelsize, prefix, diam=37., r_obstr=0.3, f
 
         
         for iter in range(0, length_cube):
-            #print('iter: ', iter)
+            print('iter: ', iter)
 
             if ((isinstance(atm_screen, (list, tuple, np.ndarray)) == True)):
                 if (atm_screen.ndim == 3):
@@ -253,49 +243,54 @@ def metiscoronagraphsimulator(n,lam, pixelsize, prefix, diam=37., r_obstr=0.3, f
 
             if (Vortex == True):
                 ## Si Vortex Si Mask --> simulate the coronagraphic-apodized psf
-                (wfo_Coro, sampling) = proper.prop_run('telescope', lam, n, PASSVALUE={'prefix':prefix, 'charge':charge, 'CAL':0, 'diam':diam, 'spiders_width':spiders_width, 'spiders_angle':spiders_angle, 'beam_ratio': beam_ratio, 'f_lens':f_lens, 'npupil':npupil, 'r_obstr':r_obstr, 'pupil_file':pupil_file, 'phase_apodizer_file':phase_apodizer_file, 'amplitude_apodizer_file':amplitude_apodizer_file, 'TILT':TILT_iter,'LS':LS,'RAVC':RAVC, 'LS_phase_apodizer_file':LS_phase_apodizer_file, 'LS_amplitude_apodizer_file':LS_amplitude_apodizer_file,'LS_parameters':LS_parameters,  'atm_screen':atm_screen_iter, 'missing_segments_number':missing_segments_number, 'apodizer_misalignment':apodizer_misalignment_iter, 'LS_misalignment':LS_misalignment_iter, 'Island_Piston':Island_Piston_iter, 'NCPA':NCPA_iter,'Debug_print':Debug_print,'Debug':Debug}, QUIET=True)
+                (wfo_Coro, sampling) = proper.prop_run('telescope', lam, n, PASSVALUE={'prefix':prefix,'path':path,  'charge':charge, 'CAL':0, 'diam':diam, 'spiders_width':spiders_width, 'spiders_angle':spiders_angle, 'beam_ratio': beam_ratio, 'f_lens':f_lens, 'npupil':npupil, 'r_obstr':r_obstr, 'pupil_file':pupil_file, 'phase_apodizer_file':phase_apodizer_file, 'amplitude_apodizer_file':amplitude_apodizer_file, 'TILT':TILT_iter,'LS':LS,'RAVC':RAVC, 'LS_phase_apodizer_file':LS_phase_apodizer_file, 'LS_amplitude_apodizer_file':LS_amplitude_apodizer_file,'LS_parameters':LS_parameters,  'atm_screen':atm_screen_iter, 'missing_segments_number':missing_segments_number, 'apodizer_misalignment':apodizer_misalignment_iter, 'LS_misalignment':LS_misalignment_iter, 'Island_Piston':Island_Piston_iter, 'NCPA':NCPA_iter,'Debug_print':Debug_print,'Debug':Debug}, QUIET=True)
                 psf_Coro[iter,:,:] = (abs(wfo_Coro))**2
             else:
         
             ## Apodizer --> simulate a coronagraphic psf with an apodizer (no Vortex)
-                (wfo_apodizer, sampling) = proper.prop_run('telescope', lam, n, PASSVALUE={'prefix':prefix, 'charge':0, 'CAL':0, 'diam':diam, 'spiders_width':spiders_width, 'spiders_angle':spiders_angle, 'beam_ratio': beam_ratio, 'f_lens':f_lens, 'npupil':npupil, 'r_obstr':r_obstr, 'pupil_file':pupil_file, 'phase_apodizer_file':phase_apodizer_file, 'amplitude_apodizer_file':amplitude_apodizer_file, 'TILT':TILT_iter,'LS':LS,'RAVC':False, 'LS_phase_apodizer_file':LS_phase_apodizer_file, 'LS_amplitude_apodizer_file':LS_amplitude_apodizer_file,'LS_parameters':LS_parameters, 'atm_screen':atm_screen_iter, 'missing_segments_number':missing_segments_number, 'apodizer_misalignment':apodizer_misalignment_iter, 'LS_misalignment':LS_misalignment_iter, 'Island_Piston':Island_Piston_iter,'NCPA':NCPA_iter, 'Debug_print':Debug_print,'Debug':Debug}, QUIET=True)
+                (wfo_apodizer, sampling) = proper.prop_run('telescope', lam, n, PASSVALUE={'prefix':prefix,'path':path,  'charge':0, 'CAL':0, 'diam':diam, 'spiders_width':spiders_width, 'spiders_angle':spiders_angle, 'beam_ratio': beam_ratio, 'f_lens':f_lens, 'npupil':npupil, 'r_obstr':r_obstr, 'pupil_file':pupil_file, 'phase_apodizer_file':phase_apodizer_file, 'amplitude_apodizer_file':amplitude_apodizer_file, 'TILT':TILT_iter,'LS':LS,'RAVC':False, 'LS_phase_apodizer_file':LS_phase_apodizer_file, 'LS_amplitude_apodizer_file':LS_amplitude_apodizer_file,'LS_parameters':LS_parameters, 'atm_screen':atm_screen_iter, 'missing_segments_number':missing_segments_number, 'apodizer_misalignment':apodizer_misalignment_iter, 'LS_misalignment':LS_misalignment_iter, 'Island_Piston':Island_Piston_iter,'NCPA':NCPA_iter, 'Debug_print':Debug_print,'Debug':Debug}, QUIET=True)
                 psf_Coro[iter,:,:]  = (abs(wfo_apodizer))**2
         
-        fits.writeto(prefix+'_psf_cube_Coro_nonorm.fits', psf_Coro[:,int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio),int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio)], overwrite=True)
+        fits.writeto(path+prefix+'_psf_cube_Coro_nonorm.fits', psf_Coro[:,int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio),int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio)], overwrite=True)
         if (Norm_max == True):
             if (Vortex == True):
                 psf_Coro_maxnorm = psf_Coro/np.max(Offaxis_psf)
             else:
                 psf_Coro_maxnorm = psf_Coro/np.max(NoCoro_psf)
-        fits.writeto(prefix+'_psf_cube_Coro_maxnorm.fits', psf_Coro_maxnorm[:,int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio),int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio)], overwrite=True)
+        fits.writeto(path+prefix+'_psf_cube_Coro_maxnorm.fits', psf_Coro_maxnorm[:,int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio),int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio)], overwrite=True)
         if (Norm_flux1 == True):
             psf_Coro_flux1norm = psf_Coro/sum(sum(NoCoro_psf))
-            fits.writeto(prefix+'_psf_cube_Coro_flux1norm.fits', psf_Coro_flux1norm[:,int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio),int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio)], overwrite=True)
+            fits.writeto(path+prefix+'_psf_cube_Coro_flux1norm.fits', psf_Coro_flux1norm[:,int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio),int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio)], overwrite=True)
 
         
     else:
         print('No Cube')
         if (Vortex == True):
+            print('VC') 
+            print('ATM: ', int(isinstance(atm_screen, (list, tuple, np.ndarray)) == True))
+            print('atm screen: ', atm_screen.shape)
         ## Si Vortex Si Mask --> simulate the coronagraphic-apodized psf
-            (wfo_Coro, sampling) = proper.prop_run('telescope', lam, n, PASSVALUE={'prefix':prefix, 'charge':charge, 'CAL':0, 'diam':diam, 'spiders_width':spiders_width, 'spiders_angle':spiders_angle, 'beam_ratio': beam_ratio, 'f_lens':f_lens, 'npupil':npupil, 'r_obstr':r_obstr, 'pupil_file':pupil_file, 'phase_apodizer_file':phase_apodizer_file, 'amplitude_apodizer_file':amplitude_apodizer_file, 'TILT':TILT,'LS':LS,'RAVC':RAVC, 'LS_phase_apodizer_file':LS_phase_apodizer_file, 'LS_amplitude_apodizer_file':LS_amplitude_apodizer_file,'LS_parameters':LS_parameters,  'atm_screen':atm_screen, 'missing_segments_number':missing_segments_number, 'apodizer_misalignment':apodizer_misalignment, 'LS_misalignment':LS_misalignment, 'Island_Piston':Island_Piston, 'NCPA':NCPA,'Debug_print':Debug_print,'Debug':Debug}, QUIET=True)
+            (wfo_Coro, sampling) = proper.prop_run('telescope', lam, n, PASSVALUE={'prefix':prefix,'path':path,  'charge':charge, 'CAL':0, 'diam':diam, 'spiders_width':spiders_width, 'spiders_angle':spiders_angle, 'beam_ratio': beam_ratio, 'f_lens':f_lens, 'npupil':npupil, 'r_obstr':r_obstr, 'pupil_file':pupil_file, 'phase_apodizer_file':phase_apodizer_file, 'amplitude_apodizer_file':amplitude_apodizer_file, 'TILT':TILT,'LS':LS,'RAVC':RAVC, 'LS_phase_apodizer_file':LS_phase_apodizer_file, 'LS_amplitude_apodizer_file':LS_amplitude_apodizer_file,'LS_parameters':LS_parameters,  'atm_screen':atm_screen, 'missing_segments_number':missing_segments_number, 'apodizer_misalignment':apodizer_misalignment, 'LS_misalignment':LS_misalignment, 'Island_Piston':Island_Piston, 'NCPA':NCPA,'Debug_print':Debug_print,'Debug':Debug}, QUIET=True)
             psf_Coro = (abs(wfo_Coro))**2
         
         else:
-                
+            print('Apodizer')  
+            print('ATM: ', int(isinstance(atm_screen, (list, tuple, np.ndarray)) == True))
+            print('atm screen: ', atm_screen.shape)
             ## Apodizer --> simulate a coronagraphic psf with an apodizer (no Vortex)
-            (wfo_apodizer, sampling) = proper.prop_run('telescope', lam, n, PASSVALUE={'prefix':prefix, 'charge':0, 'CAL':0, 'diam':diam, 'spiders_width':spiders_width, 'spiders_angle':spiders_angle, 'beam_ratio': beam_ratio, 'f_lens':f_lens, 'npupil':npupil, 'r_obstr':r_obstr, 'pupil_file':pupil_file, 'phase_apodizer_file':phase_apodizer_file, 'amplitude_apodizer_file':amplitude_apodizer_file, 'TILT':TILT,'LS':LS,'RAVC':False, 'LS_phase_apodizer_file':LS_phase_apodizer_file, 'LS_amplitude_apodizer_file':LS_amplitude_apodizer_file,'LS_parameters':LS_parameters, 'atm_screen':atm_screen, 'missing_segments_number':missing_segments_number, 'apodizer_misalignment':apodizer_misalignment, 'LS_misalignment':LS_misalignment, 'Island_Piston':Island_Piston,'NCPA':NCPA, 'Debug_print':Debug_print,'Debug':Debug}, QUIET=True)
+            (wfo_apodizer, sampling) = proper.prop_run('telescope', lam, n, PASSVALUE={'prefix':prefix,'path':path,  'charge':0, 'CAL':0, 'diam':diam, 'spiders_width':spiders_width, 'spiders_angle':spiders_angle, 'beam_ratio': beam_ratio, 'f_lens':f_lens, 'npupil':npupil, 'r_obstr':r_obstr, 'pupil_file':pupil_file, 'phase_apodizer_file':phase_apodizer_file, 'amplitude_apodizer_file':amplitude_apodizer_file, 'TILT':TILT,'LS':LS,'RAVC':False, 'LS_phase_apodizer_file':LS_phase_apodizer_file, 'LS_amplitude_apodizer_file':LS_amplitude_apodizer_file,'LS_parameters':LS_parameters, 'atm_screen':atm_screen, 'missing_segments_number':missing_segments_number, 'apodizer_misalignment':apodizer_misalignment, 'LS_misalignment':LS_misalignment, 'Island_Piston':Island_Piston,'NCPA':NCPA, 'Debug_print':Debug_print,'Debug':Debug}, QUIET=True)
             psf_Coro = (abs(wfo_apodizer))**2
 
-        fits.writeto(prefix+'_psf_Coro_nonorm.fits', psf_Coro[int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio),int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio)], overwrite=True)
+        fits.writeto(path+prefix+'_psf_Coro_nonorm.fits', psf_Coro[int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio),int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio)], overwrite=True)
         if (Norm_max == True):
             if (Vortex == True):
                 psf_Coro_maxnorm = psf_Coro/np.max(Offaxis_psf)
             else:
                 psf_Coro_maxnorm = psf_Coro/np.max(NoCoro_psf)
-            fits.writeto(prefix+'_psf_Coro_maxnorm.fits', psf_Coro_maxnorm[int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio),int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio)], overwrite=True)
+            fits.writeto(path+prefix+'_psf_Coro_maxnorm.fits', psf_Coro_maxnorm[int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio),int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio)], overwrite=True)
         if (Norm_flux1 == True):
             psf_Coro_flux1norm = psf_Coro/sum(sum(NoCoro_psf))
-            fits.writeto(prefix+'_psf_Coro_flux1norm.fits', psf_Coro_flux1norm[int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio),int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio)], overwrite=True)
+            fits.writeto(path+prefix+'_psf_Coro_flux1norm.fits', psf_Coro_flux1norm[int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio),int(n/2)-math.ceil(50./beam_ratio):int(n/2)+math.ceil(50./beam_ratio)], overwrite=True)
 
 
 

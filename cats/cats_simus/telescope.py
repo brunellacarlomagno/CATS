@@ -1,15 +1,17 @@
 import proper
 import numpy as np
+import os
 
 from astropy.io import fits
 
 from cats.cats_simus import *
 
 
-def telescope(wavelength, gridsize,PASSVALUE = {'prefix':'prova', 'charge':0, 'CAL':0, 'diam':37., 'spiders_width':0.60, 'spiders_angle':[0., 60., 120.], 'beam_ratio': 0.25, 'f_lens':658.6, 'npupil':243, 'r_obstr':0.3, 'pupil_file':0, 'phase_apodizer_file':0, 'amplitude_apodizer_file':0, 'TILT':[0., 0.],'LS':False,'RAVC':False, 'LS_phase_apodizer_file':0, 'LS_amplitude_apodizer_file':0,'LS_parameters':[0.0, 0.0, 0.0], 'atm_screen':0, 'missing_segments_number':0, 'apodizer_misalignment':[0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'LS_misalignment':[0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'Island_Piston':[0.0, 0.0, 0.0, 0.0, 0.0, 0.0],'NCPA':0, 'Debug_print':False,'Debug':False}):
+def telescope(wavelength, gridsize,PASSVALUE = {'prefix':'prova', 'path':os.path.abspath(os.path.join(__file__, os.pardir)), 'charge':0, 'CAL':0, 'diam':37., 'spiders_width':0.60, 'spiders_angle':[0., 60., 120.], 'beam_ratio': 0.25, 'f_lens':658.6, 'npupil':243, 'r_obstr':0.3, 'pupil_file':0, 'phase_apodizer_file':0, 'amplitude_apodizer_file':0, 'TILT':[0., 0.],'LS':False,'RAVC':False, 'LS_phase_apodizer_file':0, 'LS_amplitude_apodizer_file':0,'LS_parameters':[0.0, 0.0, 0.0], 'atm_screen':0, 'missing_segments_number':0, 'apodizer_misalignment':[0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'LS_misalignment':[0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'Island_Piston':[0.0, 0.0, 0.0, 0.0, 0.0, 0.0],'NCPA':0, 'Debug_print':False,'Debug':False}):
     
      ## call all the vues passed via passvalue
     prefix = PASSVALUE['prefix']
+    path = PASSVALUE['path']
     charge = PASSVALUE['charge']
     CAL = PASSVALUE['CAL']
     diam = PASSVALUE['diam']
@@ -54,23 +56,24 @@ def telescope(wavelength, gridsize,PASSVALUE = {'prefix':'prova', 'charge':0, 'C
     pupil(wfo, CAL, npupil, diam, r_obstr, spiders_width, spiders_angle, pupil_file, missing_segments_number, Debug, Debug_print)
 
     if (Debug==True):
-        fits.writeto(prefix+'_pupil_pre_define.fits', proper.prop_get_amplitude(wfo)[int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50),int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50)], overwrite=True)
+        fits.writeto(path + prefix+'_pupil_pre_define.fits', proper.prop_get_amplitude(wfo)[int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50),int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50)], overwrite=True)
 
     proper.prop_define_entrance(wfo) #define the entrance wavefront
 
 #wfo.wfarr *= 1./np.amax(wfo._wfarr) # max(amplitude)=1
 
     if (isinstance(atm_screen, (list, tuple, np.ndarray)) == True) and (atm_screen.ndim >= 2): # when the atmosphere is present
+        print('atmosphere')
         atmosphere(wfo, npupil, atm_screen, Debug_print, Debug)
     
     if (isinstance(NCPA, (list, tuple, np.ndarray)) == True) and (NCPA.ndim >= 2): # when the atmosphere is present
-        NCPA_application(wfo, npupil, NCPA, Debug_print, Debug)
+        NCPA_application(wfo, npupil, NCPA, path, Debug_print, Debug)
     
     if (RAVC == True) or (isinstance(phase_apodizer_file, (list, tuple, np.ndarray)) == True) or (isinstance(amplitude_apodizer_file, (list, tuple, np.ndarray)) == True): # when tha apodizer is present
         apodization(wfo, r_obstr, npupil, RAVC, phase_apodizer_file, amplitude_apodizer_file, apodizer_misalignment, Debug_print, Debug)
     
     if (all(v == 0 for v in Island_Piston) == False): # when the piston is present
-        island_effect_piston(wfo, npupil, Island_Piston, Debug_print, Debug)
+        island_effect_piston(wfo, npupil, Island_Piston, path, Debug_print, Debug)
     
     if (TILT.any != 0.): # when tip/tilt
         if (Debug_print==True):
@@ -81,26 +84,30 @@ def telescope(wavelength, gridsize,PASSVALUE = {'prefix':'prova', 'charge':0, 'C
 
     if (Debug==True):
         if CAL==1:
-            fits.writeto(prefix+'_pupil_amplitude_CAL1.fits', proper.prop_get_amplitude(wfo)[int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50),int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50)], overwrite=True)
-            fits.writeto(prefix+'_pupil_phase_CAL1.fits', proper.prop_get_phase(wfo)[int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50),int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50)], overwrite=True)
+            fits.writeto(path + prefix+'_pupil_amplitude_CAL1.fits', proper.prop_get_amplitude(wfo)[int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50),int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50)], overwrite=True)
+            fits.writeto(path + prefix+'_pupil_phase_CAL1.fits', proper.prop_get_phase(wfo)[int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50),int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50)], overwrite=True)
         else:
-            fits.writeto(prefix+'_pupil_amplitude_CAL0_RA'+str(int(RAVC))+'_charge'+str(charge)+'_ATM'+str(int(isinstance(atm_screen, (list, tuple, np.ndarray)) == True))+'.fits', proper.prop_get_amplitude(wfo)[int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50),int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50)], overwrite=True)
-            fits.writeto(prefix+'_pupil_phase_CAL0_RA'+str(int(RAVC))+'_charge'+str(charge)+'_ATM'+str(int(isinstance(atm_screen, (list, tuple, np.ndarray)) == True))+'.fits', proper.prop_get_phase(wfo)[int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50),int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50)], overwrite=True)
+            fits.writeto(path + prefix+'_pupil_amplitude_CAL0_RA'+str(int(RAVC))+'_charge'+str(charge)+'_ATM'+str(int(isinstance(atm_screen, (list, tuple, np.ndarray)) == True))+'.fits', proper.prop_get_amplitude(wfo)[int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50),int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50)], overwrite=True)
+            fits.writeto(path + prefix+'_pupil_phase_CAL0_RA'+str(int(RAVC))+'_charge'+str(charge)+'_ATM'+str(int(isinstance(atm_screen, (list, tuple, np.ndarray)) == True))+'.fits', proper.prop_get_phase(wfo)[int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50),int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50)], overwrite=True)
            
     proper.prop_propagate(wfo, f_lens, 'inizio') # propagate wavefront
 
     proper.prop_lens(wfo, f_lens, 'focusing lens vortex') # propagate through a lens
     proper.prop_propagate(wfo, f_lens, 'VC') # propagate wavefront
 
-    vortex(wfo, CAL, charge, f_lens, Debug_print)
+    vortex(wfo, CAL, charge, f_lens, path, Debug_print)
 
     if (Debug==True):
         if CAL==1:
-            fits.writeto(prefix+'_afterVortex_CAL1.fits', proper.prop_get_amplitude(wfo)[int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50),int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50)], overwrite=True)
-            fits.writeto(prefix+'_afterVortex_CAL1_phase.fits', proper.prop_get_phase(wfo)[int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50),int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50)], overwrite=True)
+            fits.writeto(path + prefix+'_afterVortex_CAL1.fits', proper.prop_get_amplitude(wfo)[int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50),int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50)], overwrite=True)
+            fits.writeto(path + prefix+'_afterVortex_CAL1_phase.fits', proper.prop_get_phase(wfo)[int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50),int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50)], overwrite=True)
         else:
-            fits.writeto(prefix+'_afterVortex_CAL0_RA'+str(int(RAVC))+'_charge'+str(charge)+'_ATM'+str(int(isinstance(atm_screen, (list, tuple, np.ndarray)) == True))+'.fits', proper.prop_get_amplitude(wfo)[int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50),int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50)], overwrite=True)
-            fits.writeto(prefix+'_afterVortex_phase_CAL0_RA'+str(int(RAVC))+'_charge'+str(charge)+'_ATM'+str(int(isinstance(atm_screen, (list, tuple, np.ndarray)) == True))+'.fits', proper.prop_get_phase(wfo)[int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50),int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50)], overwrite=True)
+            print('ATM: ', str(int(isinstance(atm_screen, (list, tuple, np.ndarray)) == True)))
+            if ((((int(isinstance(atm_screen, (list, tuple, np.ndarray)) == True))))==1):
+                print('atm_screen: ', atm_screen.shape)
+                print('ATM: ', int(isinstance(atm_screen, (list, tuple, np.ndarray)) == True))
+            fits.writeto(path + prefix+'_afterVortex_CAL0_RA'+str(int(RAVC))+'_charge'+str(charge)+'_ATM'+str(int(isinstance(atm_screen, (list, tuple, np.ndarray)) == True))+'.fits', proper.prop_get_amplitude(wfo)[int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50),int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50)], overwrite=True)
+            fits.writeto(path + prefix+'_afterVortex_phase_CAL0_RA'+str(int(RAVC))+'_charge'+str(charge)+'_ATM'+str(int(isinstance(atm_screen, (list, tuple, np.ndarray)) == True))+'.fits', proper.prop_get_phase(wfo)[int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50),int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50)], overwrite=True)
 
     proper.prop_propagate(wfo, f_lens, 'Lyot Collimetor') # propagate wavefront
 
@@ -109,17 +116,17 @@ def telescope(wavelength, gridsize,PASSVALUE = {'prefix':'prova', 'charge':0, 'C
 
     if (Debug==True):
         if CAL==1:
-            fits.writeto(prefix+'_beforeLS_CAL1.fits', proper.prop_get_amplitude(wfo)[int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50),int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50)], overwrite=True)
+            fits.writeto(path + prefix+'_beforeLS_CAL1.fits', proper.prop_get_amplitude(wfo)[int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50),int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50)], overwrite=True)
         else:
-            fits.writeto(prefix+'_beforeLS_CAL0_charge'+str(charge)+'_ATM'+str(int(isinstance(atm_screen, (list, tuple, np.ndarray)) == True))+'.fits', proper.prop_get_amplitude(wfo)[int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50),int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50)], overwrite=True)
+            fits.writeto(path + prefix+'_beforeLS_CAL0_charge'+str(charge)+'_ATM'+str(int(isinstance(atm_screen, (list, tuple, np.ndarray)) == True))+'.fits', proper.prop_get_amplitude(wfo)[int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50),int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50)], overwrite=True)
 
-    lyotstop(wfo, diam, r_obstr, npupil, RAVC, LS, LS_parameters, spiders_angle, LS_phase_apodizer_file, LS_amplitude_apodizer_file, LS_misalignment, Debug_print, Debug)
+    lyotstop(wfo, diam, r_obstr, npupil, RAVC, LS, LS_parameters, spiders_angle, LS_phase_apodizer_file, LS_amplitude_apodizer_file, LS_misalignment, path, Debug_print, Debug)
 
     if (Debug==True):
         if CAL==1:
-            fits.writeto(prefix+'_afterLS_CAL1.fits', proper.prop_get_amplitude(wfo)[int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50),int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50)], overwrite=True)
+            fits.writeto(path + prefix+'_afterLS_CAL1.fits', proper.prop_get_amplitude(wfo)[int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50),int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50)], overwrite=True)
         else:
-            fits.writeto(prefix+'_afterLS_CAL0_charge'+str(charge)+'_LS'+str(int(LS))+'_RA'+str(int(RAVC))+'_ATM'+str(int(isinstance(atm_screen, (list, tuple, np.ndarray)) == True))+'.fits', proper.prop_get_amplitude(wfo)[int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50),int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50)], overwrite=True)
+            fits.writeto(path + prefix+'_afterLS_CAL0_charge'+str(charge)+'_LS'+str(int(LS))+'_RA'+str(int(RAVC))+'_ATM'+str(int(isinstance(atm_screen, (list, tuple, np.ndarray)) == True))+'.fits', proper.prop_get_amplitude(wfo)[int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50),int(n/2)-int(npupil/2 + 50):int(n/2)+int(npupil/2 + 50)], overwrite=True)
  
 
     proper.prop_propagate(wfo, f_lens) # propagate wavefront

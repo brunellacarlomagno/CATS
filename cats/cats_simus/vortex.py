@@ -3,7 +3,7 @@ import cv2
 import proper
 from cats.cats_simus  import *
 
-def vortex(wfo, CAL, charge, f_lens, Debug_print):
+def vortex(wfo, CAL, charge, f_lens, path, Debug_print):
 
     n = int(proper.prop_get_gridsize(wfo))
     ofst = 0 # no offset
@@ -15,7 +15,7 @@ def vortex(wfo, CAL, charge, f_lens, Debug_print):
         if CAL==1: # create the vortex for a perfectly circular pupil
             if (Debug_print == True):
                 print ("CAL:1, charge ", charge)
-            writefield('zz_psf', wfo.wfarr) # write the pre-vortex field
+            writefield(path,'zz_psf', wfo.wfarr) # write the pre-vortex field
             nramp = int(n*ramp_oversamp) #oversamp
             # create the vortex by creating a matrix (theta) representing the ramp (created by atan 2 gradually varying matrix, x and y)
             y1 = np.ones((nramp,), dtype=np.int)
@@ -39,7 +39,7 @@ def vortex(wfo, CAL, charge, f_lens, Debug_print):
             vvc_complex.imag = vvcphase
             vvc = np.exp(vvc_complex)
             vvc_tmp = 0.
-            writefield('zz_vvc', vvc) # write the theoretical vortex field
+            writefield(path,'zz_vvc', vvc) # write the theoretical vortex field
             wfo0 = wfo
             proper.prop_multiply(wfo, vvc)
             proper.prop_propagate(wfo, f_lens, 'OAP2')
@@ -49,18 +49,18 @@ def vortex(wfo, CAL, charge, f_lens, Debug_print):
             proper.prop_propagate(wfo, -f_lens) # back-propagation
             proper.prop_lens(wfo, -f_lens)
             proper.prop_propagate(wfo, -f_lens)
-            writefield('zz_perf', wfo.wfarr) # write the perfect-result vortex field
+            writefield(path,'zz_perf', wfo.wfarr) # write the perfect-result vortex field
             wfo = wfo0
         else:
             if (Debug_print == True):
                 print ("CAL:0, charge ", charge)
-            vvc = readfield('zz_vvc') # read the theoretical vortex field
+            vvc = readfield(path,'zz_vvc') # read the theoretical vortex field
             vvc = proper.prop_shift_center(vvc)
             scale_psf = wfo._wfarr[0,0]
-            psf_num = readfield('zz_psf') # read the pre-vortex field
+            psf_num = readfield(path,'zz_psf') # read the pre-vortex field
             psf0 = psf_num[0,0]
             psf_num = psf_num/psf0*scale_psf
-            perf_num = readfield('zz_perf') # read the perfect-result vortex field
+            perf_num = readfield(path,'zz_perf') # read the perfect-result vortex field
             perf_num = perf_num/psf0*scale_psf
             wfo._wfarr = (wfo._wfarr - psf_num)*vvc + perf_num # the wavefront takes into account the real pupil with the perfect-result vortex field
 

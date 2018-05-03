@@ -6,7 +6,7 @@ import math
 from astropy.io import fits
 import os
 
-def island_effect_piston(wf, npupil, Island_Piston, Debug_print, Debug):
+def island_effect_piston(wf, npupil, Island_Piston, path, Debug_print, Debug):
 
     n = int(proper.prop_get_gridsize(wf))
     lamda=proper.prop_get_wavelength(wf) #save the wavelength value [m] into lamda
@@ -41,7 +41,7 @@ def island_effect_piston(wf, npupil, Island_Piston, Debug_print, Debug):
         print("npupil: ", npupil)
     piston_large[int(n/2)+1-int(npupil/2)-1:int(n/2)+1+int(npupil/2),int(n/2)+1-int(npupil/2)-1:int(n/2)+1+int(npupil/2)] =piston_scale # insert the scaled pupil into the 0s grid
     if (Debug == 1):
-        fits.writeto('piston_phase.fits', piston_large, overwrite=True) # fits file for the screen
+        fits.writeto(path+'piston_phase.fits', piston_large, overwrite=True) # fits file for the screen
 
 
     lambda2=lamda/(1e-6) # need to use lambda in microns

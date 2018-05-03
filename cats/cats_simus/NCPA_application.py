@@ -5,7 +5,7 @@ import proper
 import math
 from astropy.io import fits
 
-def NCPA_application(wf, npupil, NCPA, Debug_print, Debug):
+def NCPA_application(wf, npupil, NCPA, path, Debug_print, Debug):
     
     n = int(proper.prop_get_gridsize(wf))
     lamda=proper.prop_get_wavelength(wf) #save the wavelength value [m] into lamda
@@ -25,7 +25,7 @@ def NCPA_application(wf, npupil, NCPA, Debug_print, Debug):
         print("npupil: ", npupil)
     NCPA_large[int(n/2)+1-int(npupil/2)-1:int(n/2)+1+int(npupil/2),int(n/2)+1-int(npupil/2)-1:int(n/2)+1+int(npupil/2)] =NCPA_scale # insert the scaled screen into the 0s grid
     if (Debug == 1):
-        fits.writeto('NCPA_large.fits', NCPA_large, overwrite=True) # fits file for the screen
+        fits.writeto(path + 'NCPA_large.fits', NCPA_large, overwrite=True) # fits file for the screen
     
     
     lambda2=lamda/(1e-6) # need to use lambda in microns

@@ -4,7 +4,7 @@ import math
 import cv2
 from astropy.io import fits
 
-def lyotstop(wf, diam, r_obstr, npupil, RAVC, LS, LS_parameters, spiders_angle, LS_phase_apodizer_file, LS_amplitude_apodizer_file, LS_misalignment, Debug_print, Debug):
+def lyotstop(wf, diam, r_obstr, npupil, RAVC, LS, LS_parameters, spiders_angle, LS_phase_apodizer_file, LS_amplitude_apodizer_file, LS_misalignment, path, Debug_print, Debug):
 
     if (RAVC==True): # define the inner radius of the Lyot Stop
         t1_opt = 1. - 1./4*(r_obstr**2 + r_obstr*(math.sqrt(r_obstr**2 + 8.))) # define the apodizer transmission [Mawet2013]
@@ -44,7 +44,7 @@ def lyotstop(wf, diam, r_obstr, npupil, RAVC, LS, LS_parameters, spiders_angle, 
         apodizer = np.exp(phase_multiply)
         proper.prop_multiply(wf, apodizer)
         if (Debug == True):
-            fits.writeto('LS_apodizer.fits', proper.prop_get_phase(wf), overwrite=True)
+            fits.writeto(path + 'LS_apodizer.fits', proper.prop_get_phase(wf), overwrite=True)
 
     
     
@@ -66,7 +66,7 @@ def lyotstop(wf, diam, r_obstr, npupil, RAVC, LS, LS_parameters, spiders_angle, 
         apodizer = apodizer_large
         proper.prop_multiply(wf, apodizer)
         if (Debug == True):
-            fits.writeto('LS_apodizer.fits', proper.prop_get_amplitude(wf), overwrite=True)
+            fits.writeto(path + 'LS_apodizer.fits', proper.prop_get_amplitude(wf), overwrite=True)
 
 
 
